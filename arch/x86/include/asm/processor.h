@@ -41,7 +41,11 @@ struct vm86;
  */
 #define NET_IP_ALIGN	0
 
+#ifdef CONFIG_CRYPTO_TRESOR
+#define HBP_NUM 0 /* forge number of hardware breakpoint registers */
+#else
 #define HBP_NUM 4
+#endif
 
 /*
  * These alignment constraints are for performance in the vSMP case,

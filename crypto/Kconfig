@@ -1187,6 +1187,76 @@ config CRYPTO_AES_PPC_SPE
 	  architecture specific assembler implementations that work on 1KB
 	  tables or 256 bytes S-boxes.
 
+config CRYPTO_TRESOR
+	bool "AES cipher, cold boot resistant (TRESOR)"
+	depends on X86 && 64BIT
+	select CRYPTO_ALGAPI
+	select CRYPTO_MANAGER
+	select CRYPTO_MANAGER2
+	default n
+	help
+	  TRESOR Runs Encryption Securely Outside RAM
+
+	  Secure AES implementation which is resistant against cold boot
+	  attacks as described in http://citp.princeton.edu/memory/.
+
+	  The idea behind this implementation is to store the secret key
+	  inside CPU registers rather than in RAM. All computations take
+	  place only on registers, i.e., no AES state is ever going to RAM.
+
+	  In particular, the debug registers of the x86 architecture
+	  are misused as secure key storage. For debugging, the kernel uses
+	  software breakpoints only, no hardware breakpoints.
+
+	  The supported key sizes are: 128, 192 and 256 bits.
+
+	  This implementation requires Intel's AES-NI instruction set,
+	  currently available to all Core i5/i7 and many i3.
+
+	  Select at least one of the sub-options.
+
+	  If you have another CPU, say N. If unsure, say N.
+
+if CRYPTO_TRESOR
+
+config CRYPTO_TRESOR_PROMPT
+	bool "TRESOR Startup Prompt"
+	depends on CRYPTO_TRESOR
+	default y if CRYPTO_TRESOR
+	help
+	  Display a prompt at startup and after suspend to read the key
+	  which should be used for cold boot resistant encryption.
+
+comment "Disable SUSPEND & HIBERNATION to allow TRESOR_SYSFS and/or TRESOR_KEY_VIA_CPU0"
+	depends on CRYPTO_TRESOR && (SUSPEND || HIBERNATION)
+
+config CRYPTO_TRESOR_SYSFS
+	bool "TRESOR Sysfs interface"
+	depends on CRYPTO_TRESOR && !SUSPEND && !HIBERNATION
+	default n
+	help
+	  Make the key for cold boot resistant encryption accessible via
+	  sysfs. With this option the AES key be set directly as well.
+
+	  Attention: This option is not compatible with SUSPEND or HIBERNATION.
+
+config CRYPTO_TRESOR_KEY_VIA_CPU0
+	bool "load TRESOR key from CPU0's debug registers"
+	depends on CRYPTO_TRESOR && !SUSPEND && !HIBERNATION
+	default n
+	help
+	  Assume the AES key is already in the debug registers of CPU0 at
+	  startup. Copy it to the other CPUs.
+
+	  This can be used to carry over the key through kexec. (After kexec
+	  the debug registers in CPU0 are still set.)
+
+	  To use this feature, add tresor.key=cpu0 to the kernel command line.
+
+	  Attention: This option is not compatible with SUSPEND or HIBERNATION.
+
+endif	# if CRYPTO_TRESOR
+
 config CRYPTO_ANUBIS
 	tristate "Anubis cipher algorithm"
 	select CRYPTO_ALGAPI

@@ -42,7 +42,11 @@ struct arch_hw_breakpoint {
 #define X86_BREAKPOINT_RW	0x83
 
 /* Total number of available HW breakpoint registers */
+#ifdef CONFIG_CRYPTO_TRESOR
+#define HBP_NUM 0 /* forge number of hardware breakpoint registers */
+#else
 #define HBP_NUM 4
+#endif
 
 static inline int hw_breakpoint_slots(int type)
 {

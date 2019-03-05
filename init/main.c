@@ -102,6 +102,10 @@
 #define CREATE_TRACE_POINTS
 #include <trace/events/initcall.h>
 
+#ifdef CONFIG_CRYPTO_TRESOR
+#include <crypto/tresor.h>
+#endif
+
 static int kernel_init(void *);
 
 extern void init_IRQ(void);
@@ -1154,6 +1158,10 @@ static noinline void __init kernel_init_freeable(void)
 		ramdisk_execute_command = NULL;
 		prepare_namespace();
 	}
+
+#ifdef CONFIG_CRYPTO_TRESOR
+	tresor_kernel_init();
+#endif
 
 	/*
 	 * Ok, we have completed the initial bootup, and
