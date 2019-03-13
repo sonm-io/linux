@@ -366,10 +366,16 @@ static int mmap_mem(struct file *file, struct vm_area_struct *vma)
 
 	/* It's illegal to wrap around the end of the physical address space. */
 	if (offset + (phys_addr_t)size - 1 < offset)
+        {
+                printk(KERN_DEBUG "illegal to wrap around %p 0x%zx\n", offset, size);
 		return -EINVAL;
+        }
 
 	if (!valid_mmap_phys_addr_range(vma->vm_pgoff, size))
+        {
+                printk(KERN_DEBUG "!valid_mmap_phys_range %p 0x%zx\n", offset, size);
 		return -EINVAL;
+        }
 
 	if (!private_mapping_ok(vma))
 		return -ENOSYS;
@@ -377,9 +383,14 @@ static int mmap_mem(struct file *file, struct vm_area_struct *vma)
 	if (!range_is_allowed(vma->vm_pgoff, size))
 		return -EPERM;
 
+#if 0
+	/* SONM: Turn off memory aliasing check */
 	if (!phys_mem_access_prot_allowed(file, vma->vm_pgoff, size,
 						&vma->vm_page_prot))
+        {
 		return -EINVAL;
+        }
+#endif
 
 	vma->vm_page_prot = phys_mem_access_prot(file, vma->vm_pgoff,
 						 size,
