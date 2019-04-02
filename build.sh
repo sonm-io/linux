@@ -11,6 +11,6 @@ docker exec -u 0:0 $CTID useradd -g $(id -g) -u $(id -u) sonm
 docker exec $CTID make mrproper
 docker exec $CTID make sonm_defconfig
 KVER=$(docker exec $CTID make kernelversion)
-docker exec $CTID make deb-pkg -j$(nproc) KDEB_PKGVERSION=${KVER}
+docker exec $CTID make deb-pkg -j$(nproc) KDEB_PKGVERSION=${KVER} LOCALVERSION=
 docker stop $CTID
 echo "Artifacts are in $(dirname "$(pwd)")/pkg-out."
